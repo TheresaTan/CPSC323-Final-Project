@@ -1,0 +1,30 @@
+//Coded First and Follow Parsing Table
+
+    int table[23][20] = {
+
+            //state  program                        integer   show(     ; var     begin    end     a-e     0-9       +        -        (        *         /        ,         :          );       =          ;       $   invalid
+            /*P=0*/ {"program I; var D begin G end", "null", "null"   , "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*I=1*/ {"null"                        , "null", "null"   , "null"  , "null", "null", "LK"  , "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*K=2*/ {"null"                        , "null", "null"   , "lambda", "null", "null", "LK"  , "JK"  , "null" , "null" , "null", "lambda", "lambda", "lambda", "lambda", "lambda", "lambda", "null" , "null", "null"},
+            /*D=3*/ {"null"                        , "null", "null"   , "null"  , "null", "null", "B:C;", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*B=4*/ {"null"                        , "null", "null"   , "null"  , "null", "null", "IM"  , "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*M=5*/ {"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , ",IM"   , "lambda", "null"  , "null"  , "null" , "null", "null"},
+            /*C=6*/ {"null"                      ,"integer", "null"   , "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*G=7*/ {"null"                        , "null", "SU"     , "null"  , "null", "null", "SU"  , "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*S=8*/ {"null"                        , "null", "W"      , "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*W=9*/ {"null"                        , "null","show(I);", "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*A=10*/{"null"                        , "null", "null"   , "null"  , "null", "null", "I=E;", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*E=11*/{"null"                        , "null", "null"   , "null"  , "null", "null", "TQ"  , "TQ"  , "TQ"   , "TQ"   , "TQ"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*Q=12*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null", "+TQ"  , "-TQ"  , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  ,"lambda", "null", "null"},
+            /*T=13*/{"null"                        , "null", "null"   , "null"  , "null", "null", "FR"  , "FR"  , "FR"   , "FR"   , "FR"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*R=14*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null","lambda","lambda", "null", "*FR"   , "/FR"   , "null"  , "null"  , "null"  , "null"  ,"lambda", "null", "null"},
+            /*F=15*/{"null"                        , "null", "null"   , "null"  , "null", "null", "I"   , "N"   , "N"    , "N"    , "(E)" , "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*N=16*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "JO"  , "HJO"  , "HJO"  , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*O=17*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "JO"  ,"lambda","lambda", "null","lambda" ,"lambda" , "null"  , "null"  , "null"  , "null"  ,"lambda", "null", "null"},
+            /*H=18*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null","lambda", "+"   , "-"    , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*J=19*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "0-9" , "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*L=20*/{"null"                        , "null", "null"   , "null"  , "null", "null", "a-e" , "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*U=21*/{"null"                        , "null", "null"   , "null"  , "null","lambda", "SU" , "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"},
+            /*null*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null", "null"}
+
+    };
