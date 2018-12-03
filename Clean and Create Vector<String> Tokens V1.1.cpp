@@ -21,6 +21,12 @@ void program_vector(vector<string>&); // populate a vector with the tokens found
 
 int main() {
 
+	if (remove("finalp2.txt") == 0) {
+		cout << "\n\n\tPrevious finalp2.txt file found and deleted\n\n";
+		PAUSE
+			system("cls");
+	}
+
 	string file_contents;
 
 	readfile(file_contents);
@@ -69,8 +75,8 @@ int main() {
 	*/
 
 	//	VECTOR POPULATION CHECK		PASSED
-
-	for (int x = 0; x < vector_given_tokens.size(); x++) {
+	cout << "\n\tTOKEN VECTOR POPULATION CHECK\n\n";
+	for (int x = 0; x < vector_given_tokens.size(); x++) {	//	VECTOR POPULATION CHECK
 		cout << x << ":\t" << vector_given_tokens[x] << "\n";
 	}
 
@@ -93,73 +99,23 @@ void readfile(string &file_contents) { // a function to read a file into a strin
 		cout << "finalp1.txt FOUND!\n\n";
 
 	string str_line;
-	/*bool multi = 0;
-
-	size_t start_found_at = 0;
-	size_t end_found_at = 0;*/
 
 	while (!ifile.eof()) {
 		getline(ifile, str_line);
 
-		remove_white_space(str_line); //remove white space
+		remove_white_space(str_line);				// remove white space
 
-		////	REMOVE MULTIPLE LINE COMMENTS
+		remove_multiple_comments(ifile, str_line);	// REMOVE MULTIPLE LINE COMMENTS
 
-		remove_multiple_comments(ifile, str_line);
+		remove_single_comments(str_line);			// remove single line comments
 
-		//start_found_at = str_line.find("/*"); // by default, the std::string.find(<string>) will return std::string::npos (the maximum amount of characters in a string)
-		//if (start_found_at != std::string::npos) {
-		//	//cout << "Start Multi Comment Found\n";
-		//	multi = 1;
-
-		//	end_found_at = str_line.find("*/");	// see if "*/" is in this line
-		//	if (end_found_at != std::string::npos) {
-		//		str_line.erase(str_line.begin() + start_found_at, str_line.begin() + end_found_at + 1);
-
-		//		str_line += str_line;
-
-		//		multi = 0;
-		//	}
-
-		//	else {
-		//		str_line.pop_back();
-		//		getline(ifile, str_line); // grab the next line
-
-		//		while (multi) {
-		//			end_found_at = str_line.find("*/");
-		//			if (end_found_at != std::string::npos) {
-		//				//cout << "End Multi Comment Found
-		//				str_line.erase(str_line.begin(), str_line.begin() + end_found_at + 2);
-		//				multi = 0;
-		//			}
-		//		}
-		//	}
-		//}	//	END REMOVE MULTIPLE LINE COMMENTS
-
-		remove_single_comments(str_line); //remove single line comments
-
-
-
-	////		ADD PROPER SPACING
-
-		proper_spacing(str_line);
-
-	//	for (int element = 0; element < str_line.length(); element++) { // walk the string
-	//		if (ispunct(str_line[element])) {
-	//			//std::cout << str_line[element] << " ";
-
-	//			if (element != 0 && str_line[element - 1] != ' ') {
-	//				str_line.insert(str_line.begin() + element, ' ');
-	//				element += 1;
-	//			}
-	//		}
-	//	}
+		proper_spacing(str_line);					// ADD PROPER SPACING
 
 		file_contents += str_line;
 
-		if (str_line.length() > 0 &&
-			str_line.find_first_not_of(' ') != std::string::npos &&
-			str_line.find_first_not_of('\t') != std::string::npos)
+		if (str_line.length() > 0 &&									// if length is greater than 0
+			str_line.find_first_not_of(' ') != std::string::npos &&		// if the line doesnt consist of space
+			str_line.find_first_not_of('\t') != std::string::npos)		// if the line doesnt consist of tabs
 
 			file_contents += "\n";
 	}
@@ -177,7 +133,7 @@ void readfile(string &file_contents) { // a function to read a file into a strin
 } // end void readfile(string &)
 
 void remove_white_space(string &str_line) {
-	//		REMOVING WHITE SPACE
+	//		REMOVING LEADING WHITE SPACE
 
 	// this function checks to see if the line is all white_space, checking for space and tab
 	// by default, std::string.find_first_not_of(<char>) will return std::string::npos (the maximum amount of characters in a string)
@@ -185,29 +141,21 @@ void remove_white_space(string &str_line) {
 	if (str_line.find_first_not_of(' ') != std::string::npos &&
 		str_line.find_first_not_of('\t') != std::string::npos) {
 
-		//cout << "BEFORE " << str_line.length() << " : " << str_line << endl;
+		//cout << "BEFORE " << str_line.length() << " : " << str_line << endl; // DEBUG
 
 		for (int element = 0; str_line[element];) {
 
 			if (isspace(str_line[element])) {
 				while (isspace(str_line[element])) {
-					//cout << "\tSPACE FOUND\n";
+					//cout << "\tSPACE FOUND\n"; // DEBUG
 					element++;
 				}
 				continue;
 			}
 
-			//if (str_line[element] == '\t') {
-			//	while (str_line[element] == '\t') {
-			//		//cout << "\tTAB FOUND\n";
-			//		element++;
-			//	}
-			//	continue;
-			//}
-
 			if (!isspace(str_line[element])) {
 				if (element != 0) {
-					//cout << "\tERASING " << element << "ELEMENTS!" << endl;
+					//cout << "\tERASING " << element << "ELEMENTS!" << endl; // DEBUG
 					str_line.erase(str_line.begin(), str_line.begin() + element); // erase from beginning to a position
 				}
 				break;
@@ -225,7 +173,7 @@ void remove_white_space(string &str_line) {
 		if (isspace(str_line[element])) {
 			while (isspace(str_line[element + 1])) {
 				str_line.erase(str_line.begin() + element);
-				//cout << "DELETING EXTRA WS\n";
+				//cout << "DELETING EXTRA WS\n"; // DEBUG
 			}
 		}
 	}
@@ -242,7 +190,7 @@ void remove_single_comments(string &str_line) {
 
 	if (found_at != std::string::npos) {
 
-		// cout << "<// FOUND AT> : " << found_at << "\n"; // std::string.find() functionality test
+		// cout << "<// FOUND AT> : " << found_at << "\n"; // std::string.find() functionality test // DEBUG
 
 		//the following occurs while the length of the string is not equal to the 0th position that the "//" string was found
 		//it will remove the comment
@@ -263,26 +211,29 @@ void remove_multiple_comments(fstream &ifile, string &str_line) {
 
 	start_found_at = str_line.find("/*"); // by default, the std::string.find(<string>) will return std::string::npos (the maximum amount of characters in a string)
 	if (start_found_at != std::string::npos) {
-		//cout << "Start Multi Comment Found\n";
-		multi = 1;
+
+		cout << "Start Multi Comment Found\n"; // DEBUG
+		cout << str_line << endl; // DEBUG
+
+		multi = 1; // start multiple line comment symbol found
 
 		end_found_at = str_line.find("*/");	// see if "*/" is in this line
 		if (end_found_at != std::string::npos) {
-			str_line.erase(str_line.begin() + start_found_at, str_line.begin() + end_found_at + 1);
+			str_line.erase(str_line.begin() + start_found_at, str_line.begin() + end_found_at + 1); // Erase everything from the beginning of the line up to and including the / in */
 
-			str_line += str_line;
-
-			multi = 0;
+			multi = 0; // multiple line comment end symbol found. multiple line comment resolved
 		}
 
-		else {
-			str_line.pop_back();
-			getline(ifile, str_line); // grab the next line
+		else { // if "*/" is not in the line
 
-			while (multi) {
+			while (multi) { // while multiple line comment end symbol not resolved
+
+				getline(ifile, str_line); // grab the next line
+				cout << str_line << endl; // DEBUG
 				end_found_at = str_line.find("*/");
+
 				if (end_found_at != std::string::npos) {
-					//cout << "End Multi Comment Found
+					cout << "End Multi Comment Found\n"; // DEBUG
 					str_line.erase(str_line.begin(), str_line.begin() + end_found_at + 2);
 					multi = 0;
 				}
@@ -295,19 +246,26 @@ void proper_spacing(string &str_line) {
 	//		ADD PROPER SPACING
 
 	for (int element = 0; element < str_line.length(); element++) { // walk the string
-		if (ispunct(str_line[element])) {
-			//std::cout << str_line[element] << " ";
+		// if there is a punctuation and it is not the first element of the string
+			// add a space before it if there doesnt already exist a space character
+		if (element != 0 && ispunct(str_line[element]) && str_line[element - 1] != ' ') {
+			str_line.insert(str_line.begin() + element, ' ');
+			element += 1; // increment by 1 because the string increases by one and following chars from this position have their address incremented by one
+		}
 
-			if (element != 0 && str_line[element - 1] != ' ') {
-				str_line.insert(str_line.begin() + element, ' ');
-				element += 1;
-			}
+		// if there is a punctuation before another token without spaces in between (example: ",TOKEN")
+			// add a space where the token begins; between the punctuation and the next token (", TOKEN")
+		if (element != 0 && isalnum(str_line[element]) && ispunct(str_line[element - 1])) {
+			str_line.insert(str_line.begin() + element, ' ');
+			element += 1; // increment by 1 because the string increases by one and following chars from this position have their address incremented by one
 		}
 	}
 }
 
 void program_vector(vector<string>& vector_given_tokens) {
-	// CREATING TOKENS AND PLACING THEM IN A VECTOR
+
+	// CREATING TOKENS FROM THE FILE AND PLACING THEM IN A VECTOR
+
 	fstream ifile2;
 	ifile2.open("finalp2.txt");
 
