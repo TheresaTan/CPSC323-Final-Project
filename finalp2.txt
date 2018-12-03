@@ -1,0 +1,11 @@
+program a2018 ;
+var
+ab1 , , cd , e33a , d18 : integer ;
+begin
+ab1 = 3 ; 
+cd = 41 ;
+e33a = 5 ;
+show ( ab1 ) ; 
+d18 = ab1 * ( cd + 2 * e33a ) ;
+show ( d18 ) ; 
+end
