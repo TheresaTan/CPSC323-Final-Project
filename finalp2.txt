@@ -1,4 +1,4 @@
-program a2018 :
+program a2018 ;
 var
 ab1 , cd , e33a , d18 : integer ;
 begin
