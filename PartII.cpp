@@ -1,13 +1,14 @@
 
+
 //
-// Created by Theresa Tanubrata on 11/26/18.
+// Part II, Table I
 //
 
 #include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
 #include <fstream>
+//LIBRARY THAT IGNORES/TAKES OUT WHITE SPACES
 #include <sstream>
 #include <string>
 using namespace std;
@@ -27,7 +28,7 @@ string table[23][19] = {
         /*S=8*/ {"null"                        , "null", "W"      , "null"  , "null", "null", "A"   , "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
         /*W=9*/ {"null"                        , "null","show(I);", "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
         /*A=10*/{"null"                        , "null", "null"   , "null"  , "null", "null", "I=E;", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
-        /*E=11*/{"null"                        , "null", "null"   , "null"  , "null", "null", "TQ"  , "TQ"  , "TQ"   , "TQ"   , "TQ"  , "null"  , "null"  , "null"  , "null"  ,"lambda" , "null"  , "null" , "null"},
+        /*E=11*/{"null"                        , "null", "null"   , "null"  , "null", "null", "TQ"  , "TQ"  , "TQ"   , "TQ"   , "TQ"  , "null"  , "null"  , "null"  , "null"  ,  "null" , "null"  , "null" , "null"},
         /*Q=12*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null", "+TQ"  , "-TQ"  , "null", "null"  , "null"  , "null"  , "null"  ,"lambda", "null"  ,"lambda", "null"},
         /*T=13*/{"null"                        , "null", "null"   , "null"  , "null", "null", "FR"  , "FR"  , "FR"   , "FR"   , "FR"  , "null"  , "null"  , "null"  , "null"  ,"lambda", "null"  , "null" , "null"},
         /*R=14*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null","lambda","lambda", "null", "*FR"   , "/FR"   , "null"  , "null"  ,"lambda", "null"  ,"lambda", "null"},
@@ -41,14 +42,96 @@ string table[23][19] = {
         /*null*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"}
 
 };
+//vector_given_tokens is where you read the file,
+//state_stack is where you push and pop the states to accept the file
 vector<string> vector_given_tokens, state_stack;
+//Keep track of elements in the state_stack(the popped element)
 string state;
-int row, column, counter = 0;
+int row, column;
+
+//Used to debug
+void walk_stack(vector<string>);
+
+//put tokens into a vector
+void program_vector(vector<string>&);
+
+
+//Assigns the rows and does state = [row][column]
+//finds match for current state
+//puts out error messages if null
+vector<string> update_state(vector<string>, string&);
+
+//Used to iterate individual letters in string e.g ab1, ce334, etc
+//assigns the columns
+void check_var(string);
+
+//Used to iterate through reserved_words and other terminals
+//assigns the columns
+void check_word(string);
+
+
+
+int main(){
+
+    //PUTTING TOKENS INTO A VECTOR
+    program_vector(vector_given_tokens);
+    walk_stack(vector_given_tokens);
+
+    //the word read in the file
+    string iter;
+    int i = 0;
+    //pushing first element onto the stack
+    state_stack.push_back("P");
+
+    for(int i=0; i<vector_given_tokens.size(); i++){
+        //pop top element in state_stack
+        state = state_stack.back();
+        state_stack.pop_back();
+        cout <<"Pop: " << state << endl;
+        iter = vector_given_tokens[i];
+        cout << "Read: " << iter << endl;
+
+
+        check_word(iter);
+
+        if(state == "null") break;
+
+
+    }
+
+    
+    //checks if state_stack is empty and if not then there end is missing from the file
+    if(!state_stack.empty()){
+        cout << "End is expected\n";
+        state = "null";
+    }
+
+
+
+    if(state != "null") cout << "No error.\nAccepted!";
+    else cout << "Rejected.\n";
+
+
+    return 0;
+}
+
+
+void walk_stack(vector<string> state_stack){
+    vector<string> temp = state_stack;
+    cout << "Current Stack: ";
+    for(auto it = temp.begin(); it < temp.end(); it++){
+        cout << *it << " \t";
+    }
+    cout << endl;
+}
+
+
 
 void program_vector(vector<string>& vector_given_tokens) {
     // CREATING TOKENS AND PLACING THEM IN A VECTOR
     fstream filename;
     //used my files path to find the file
+    //THIS PATH WILL NOT WORK ON SOMEONE ELSES COMPUTER
     filename.open("/Users/Theresa/CLionProjects/untitled13/filep2.txt");
 
     if (!filename.is_open()) {
@@ -62,6 +145,7 @@ void program_vector(vector<string>& vector_given_tokens) {
     //using istringstream to split up words in the line while ignoring white spaces
     while (!filename.eof()) {
         getline(filename, str_line);
+        //IGNORES OUT WHITE SPACES
         istringstream iss(str_line);
 
         while(iss >> word){
@@ -69,23 +153,111 @@ void program_vector(vector<string>& vector_given_tokens) {
         }
     }
 
+    //system("pause");
+
 
 }
 
 
-void walk_stack(vector<string> state_stack){
-    vector<string> temp = state_stack;
-    cout << "Current Stack: ";
-    for(auto it = temp.begin(); it < temp.end(); it++){
-        cout << *it << " \t";
+void check_var(string iter){
+    auto it = iter.begin();
+    string letter;
+    //assigning and matching for each letter in the word to match
+    do{
+        switch(*it){
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'e': column = 6; break;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9': column = 7; break;
+
+        }
+
+        cout <<"Pop: " << state << endl;
+        cout <<"Looking for: " << *it << endl;
+        //making char a string
+        letter = *it;
+        state_stack = update_state(state_stack, letter);
+        it++;
+
+    }while(it != iter.end() && state != "null");
+}
+
+
+void check_word(string iter){
+
+    //assigning columns
+    if(iter == "program"){
+        column = 0;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter == "integer"){
+        column = 1;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter == "show"){
+        column = 2;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter  == "var"){
+        column = 3;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter  == "begin"){
+        column = 4;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter  == "end"){
+        column = 5;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter == "+"){
+        column = 8;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter == "-"){
+        column = 9;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter  == "("){
+        column = 10;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter  == "*"){
+        column = 11;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter == "/"){
+        column = 12;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter  == ","){
+        column = 13;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter == ":"){
+        column = 14;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter == ")"){
+        column = 15;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter == "="){
+        column = 16;
+        state_stack = update_state(state_stack, iter);
+    }else if(iter == ";"){
+        column = 17;
+        state_stack = update_state(state_stack, iter);
+    }else{//this checks the individual letters and ints in the variable e.g. ab1, e33a, b16
+        check_var(iter);
+
     }
-    cout << endl;
+
 }
 
-vector<string> update_state(vector<string> state_stack, string it){
+
+
+vector<string> update_state(vector<string> state_stack, string& iter){
     bool word_match = false;
-    string iter = it;
     while(!word_match) {
+        //assigning the row and reading the table with row and column
         if (state == "A") {
             row = 10;
             cout << "[" << state << "][";
@@ -241,7 +413,7 @@ vector<string> update_state(vector<string> state_stack, string it){
             cout << "Successful match: " << iter << endl;
             walk_stack(state_stack);
             word_match = true;
-        } else if (state == "program I; var D begin G end") {
+        } else if (state == "program I; var D begin G end") {   //pushing back elements from the table into the state_stack
 
             state_stack.push_back("end");
             state_stack.push_back("G");
@@ -438,7 +610,6 @@ vector<string> update_state(vector<string> state_stack, string it){
                 state = state_stack.back();
                 state_stack.pop_back();
 
-                //it++;
                 word_match = true;
             }
         } else if (state == "0-9") {
@@ -447,33 +618,74 @@ vector<string> update_state(vector<string> state_stack, string it){
                 walk_stack(state_stack);
                 state = state_stack.back();
                 state_stack.pop_back();
-                //it++;
                 word_match = true;
             }
-        } else if (state == "null") {
-            if (iter >= "a" && iter <= "b" && row == 0) {
-                cout << "program is expected\n";
-            } else if (iter == "var") {
+        }else if (state == "null") {    //finding errors and putting out error messages for states that were pushed on the stack but not on the file
+            if (iter >= "a" && iter <= "e" && row == 0) {
+                cout << "program\tis expected\n";
+                break;
+            } else if(iter >= "a" && iter <= "e" && row == 5){
+                cout << ",\tis expected\n";
+                break;
+            }else if(row == 14 && iter >= "a" && iter <= "e"){
+                cout << "Invalid Expression!\n";
+                break;
+            }else if(row == 14 ){
+                cout << ";\tis expected\n";
+                break;
+            }else if (iter == "begin") {
                 cout << iter << "\tis expected\n";
-            } else if (iter == "begin") {
-                cout << iter << "\tis expected\n";
+                break;
             } else if (iter == "end") {
                 cout << iter << "\tis expected\n";
-            } else if (iter == "integer") {
-                cout << iter << "\tis expected\n";
-            } else if (iter == "show") {
-                cout << iter << "\tis expected\n";
-            } else if (iter == ":") {
-                cout << iter << "\tis missing\n";
-            } else if (iter == ",") {
-                cout << iter << "\tis missing\n";
-            } else if (iter == "(") {
-                cout << iter << "\tLeft parantheses is missing\n";
-            } else if (iter == ")") {
-                cout << iter << "\tRight parantheses is missing\n";
+                break;
+            } else if (iter == "integer" && (row == 5)) {
+                cout << ":\tis expected\n";
+                break;
+            } else if (row == 21) {
+                cout << "Show\tis expected\n";
+                break;
+            } else if(row == 6){
+                cout << "Integer\t is expected\n";
+                break;
+            } else if(row ==1){
+                cout << "Unknown Identifier\n";
+                break;
             }
+
+        }else if(state =="var" && iter != "var"){   //these errors are for states that weren't pushed on the stack and made errors
+            cout << state << "\tis expected\n";
+            state = "null";
             break;
-        } else break;
+        }else if(state =="begin" && iter != "begin"){
+            cout << state << "\tis expected\n";
+            state = "null";
+            break;
+        }else if(state =="(" && iter != "("){
+            cout << state << "\tis expected\n";
+            state = "null";
+            break;
+        }else if(state ==")" && iter != ")"){
+            cout << state << "\tis expected\n";
+            state = "null";
+            break;
+        }else if(state =="," && iter != ","){
+            cout << state << "\tis expected\n";
+            state = "null";
+            break;
+        }else if(state ==":" && iter != ":"){
+            cout << state << "\tis expected\n";
+            state = "null";
+            break;
+        }else if(state =="=" && iter != "="){
+            cout << state << "\tis expected\n";
+            state = "null";
+            break;
+        }else if(state ==";" && iter != ";"){
+            cout << state << "\tis expected\n";
+            state = "null";
+            break;
+        }else break;
 
 
 
@@ -482,140 +694,3 @@ vector<string> update_state(vector<string> state_stack, string it){
     return state_stack;
 }
 
-
-void check_var(string iter){
-    auto it = iter.begin();
-    string letter;
-    do{
-        switch(*it){
-            case 'a':
-            case 'b':
-            case 'c':
-            case 'd':
-            case 'e': column = 6; break;
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9': column = 7; break;
-            case '+': column = 8; break;
-            case '-': column = 9; break;
-            case '(': column = 10; break;
-            case '*': column = 11; break;
-            case '/': column = 12; break;
-            case ',': column = 13; break;
-            case ':': column = 14; break;
-            case ')': column = 15; break;
-            case '=': column = 16; break;
-            case ';': column = 17; break;
-
-        }
-
-        cout <<"Pop: " << state << endl;
-        cout <<"Iter: " << *it << endl;
-        letter = *it;
-        state_stack = update_state(state_stack, letter);
-        it++;
-
-    }while(it != iter.end() && state != "null");
-}
-
-void check_word(string iter){
-
-    if(iter == "program"){
-        column = 0;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter == "integer"){
-        column = 1;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter == "show"){
-        column = 2;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter  == "var"){
-        column = 3;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter  == "begin"){
-        column = 4;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter  == "end"){
-        column = 5;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter == "+"){
-        column = 8;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter == "-"){
-        column = 9;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter  == "("){
-        column = 10;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter  == "*"){
-        column = 11;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter == "/"){
-        column = 12;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter  == ","){
-        column = 13;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter == ":"){
-        column = 14;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter == ")"){
-        column = 15;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter == "="){
-        column = 16;
-        state_stack = update_state(state_stack, iter);
-    }else if(iter == ";"){
-        column = 17;
-        state_stack = update_state(state_stack, iter);
-    }else{
-        check_var(iter);
-
-    }
-
-}
-
-
-int main(){
-
-
-    program_vector(vector_given_tokens);
-    walk_stack(vector_given_tokens);
-
-    //vector<string> state_stack;
-
-
-
-    string word;
-    string iter;
-    state_stack.push_back("P");
-
-    for(int i=0; i<vector_given_tokens.size(); i++){
-        //walk_stack(state_stack);
-        state = state_stack.back();
-        state_stack.pop_back();
-        cout <<"Pop: " << state << endl;
-        iter = vector_given_tokens[i];
-        cout << "Read: " << iter << endl;
-
-        check_word(iter);
-
-        counter++;
-
-    }
-
-
-
-    if(state != "null") cout << "No error.\n";
- //   }while(!state_stack.empty() && state != "null")
-
-
-    return 0;
-}
