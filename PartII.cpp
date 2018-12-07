@@ -7,14 +7,16 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <iostream>
 #include <fstream>
 //LIBRARY THAT IGNORES/TAKES OUT WHITE SPACES
 #include <sstream>
 #include <string>
+//#include <ctype.h>
 using namespace std;
 
 //first and follow table
-string table[23][19] = {
+string table[22][19] = {
 
         //state  program                        integer   show(     ; var     begin    end     a-e     0-9       +        -        (        *         /        ,         :          );       =          ;    invalid
         /*P=0*/ {"program I; var D begin G end", "null", "null"   , "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
@@ -38,8 +40,7 @@ string table[23][19] = {
         /*H=18*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null","lambda", "+"   , "-"    , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
         /*J=19*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "0-9" , "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
         /*L=20*/{"null"                        , "null", "null"   , "null"  , "null", "null", "a-e" , "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
-        /*U=21*/{"null"                        , "null", "SU"     , "null"  , "null","lambda", "SU" , "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
-        /*null*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"}
+        /*U=21*/{"null"                        , "null", "SU"     , "null"  , "null","lambda", "SU" , "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"}
 
 };
 //vector_given_tokens is where you read the file,
@@ -69,7 +70,9 @@ void check_var(string);
 //assigns the columns
 void check_word(string);
 
+bool check_file_for_errors(vector<string>&);
 
+bool check_spelling(string&);
 
 int main(){
 
@@ -79,10 +82,19 @@ int main(){
 
     //the word read in the file
     string iter;
-    int i = 0;
     //pushing first element onto the stack
     state_stack.push_back("P");
 
+
+    cout << "Check for errors\n";
+    //if true then there are automatic errors in the file
+    bool errors = check_file_for_errors(vector_given_tokens);
+    if(errors){
+        cout << "Rejected.\n";
+        return 0;
+    }
+
+    cout << "<START DEBUGGING FILE>\n";
     for(int i=0; i<vector_given_tokens.size(); i++){
         //pop top element in state_stack
         state = state_stack.back();
@@ -97,13 +109,6 @@ int main(){
         if(state == "null") break;
 
 
-    }
-
-    
-    //checks if state_stack is empty and if not then there end is missing from the file
-    if(!state_stack.empty()){
-        cout << "End is expected\n";
-        state = "null";
     }
 
 
@@ -158,12 +163,150 @@ void program_vector(vector<string>& vector_given_tokens) {
 
 }
 
+bool check_file_for_errors(vector<string>& vector_given_tokens){
+    //counters for the parentheses
+    int counter1 = 0, counter2 = 0;
+    //temporary vector string to keep track of declared variables
+    vector<string> temp;
+    
+    //checks if program is in the file
+    if(vector_given_tokens[0] != "program"){
+        cout << endl;
+        cout << "program \tis expected\n";
+        return true;
+    }
+
+    //checks if end is in the file
+    if(vector_given_tokens[vector_given_tokens.size()-1] != "end"){
+        cout << endl;
+        cout << "end \tis expected\n";
+        return true;
+    }
+    
+    //loops through the file to find any undefined variables, or illegal expressions
+    for(int i = 0; i < vector_given_tokens.size(); i++){
+        if(vector_given_tokens[i] == "("){
+            
+            //counts left parentheses
+            counter1++;
+        }else if(vector_given_tokens[i] == ")"){
+            
+            //counts right parentheses
+            counter2++;
+        }
+
+        if(vector_given_tokens[i] == "var"){
+            
+            //looks for variables and pushes them on a temporary vector
+            //int j = i+1;
+            //increments to the beginning of the declaration list
+            i++;
+            bool dec_list_done = false;
+            
+            //keeps looping through the declaration list until it reaches the end (: or integer)
+            while(!dec_list_done){
+                
+                //if reading : or integer then the declaration list of variables is done
+                //put : and integer in case one of them is missing from the file
+                if(vector_given_tokens[i] == ":" || vector_given_tokens[i] == "integer"){
+                    dec_list_done = true;
+                }
+                
+                //pushes back only the variables and no punctuation marks
+                if(vector_given_tokens[i] != "," && vector_given_tokens[i] != ":") {
+                    temp.push_back(vector_given_tokens[i]);
+                }
+                i++;
+            }
+            cout << "Temp stack\n";
+            walk_stack(temp);
+        }
+
+
+        //looping thorugh part that uses the declared variables: assigning values, showing values, and changing values
+        //Mainly looks for any illegal expressions or undefined variables being used
+        if(vector_given_tokens[i] == "begin" && !temp.empty()){
+            int k = i+1;
+            //current variable being looked at
+            string var_name;
+            //string used to check if the expression is legal
+            string check_expression;
+            
+            
+            while(vector_given_tokens[k] != "end"){
+                var_name = vector_given_tokens[k];
+                auto it = var_name.begin();
+                if( (*it >='a' && *it <= 'e')|| (*it >= '0' && *it <= '9') ){
+                    //specifically checks the variables
+                    if(*it >='a' && *it <= 'e'){
+                        bool defined = false;
+                        for(int l = 0; l < temp.size(); l++){
+                            if(temp[l] == var_name){
+                                defined = true;
+                            }
+                        }
+                        if(!defined){
+                            cout << endl;
+                            cout << var_name << "\tUndefined Expression!\n";
+                            return true;
+                        }
+                    }
+                    //checks whether expression is valid
+                    check_expression = vector_given_tokens[k+1];
+                    auto it2 = check_expression.begin();
+                    if( (*it2 >= 'a' && *it2 <= 'e') || *it2 == '(' || (*it2 >= '0' && *it2 <= '9')){
+                        cout << endl;
+                        cout << "Illegal Expression\n";
+                        return true;
+                    }
+
+
+                }
+                k++;
+
+            }
+        }
+
+
+    }
+    
+    //checking if the left parentheses or right parentheses is more than the other
+    if(counter1 < counter2){
+        cout << endl;
+        cout << "(\t Left Parentheses is missing.\n";
+        return true;
+    }else if(counter2 < counter1){
+        cout << endl;
+        cout << ")\t Right Parentheses is missing.\n";
+        return true;
+    }
+
+    //returns false if there are no automatic errors in the file
+    return false;
+}
+
+//Only checks the spelling of the words integer and show
+bool check_spelling(string& word){
+    //checks to see if any of the letters in the referenced word contains any of the letters from the words "integer" or "show"
+    for(auto it = word.begin(); it != word.end(); ++it){
+        if(*it == 'i' || *it == 'n' || *it == 't' || *it == 'e' || *it == 'g' || *it == 'r'){
+            cout << endl;
+            cout << "Integer is misspelled!\n";
+            return true;
+        }else if(*it == 's' || *it == 'h' || *it == 'o' || *it == 'w'){
+            cout << endl;
+            cout << "Show is misspelled!\n";
+            return true;
+        }
+    }
+}
 
 void check_var(string iter){
     auto it = iter.begin();
     string letter;
     //assigning and matching for each letter in the word to match
     do{
+        //a-e is column = 6 and 0-9 is column 7
         switch(*it){
             case 'a':
             case 'b':
@@ -409,6 +552,8 @@ vector<string> update_state(vector<string> state_stack, string& iter){
             state = table[row][column];
             cout << state << endl;
         }
+
+
         if (state == iter) {
             cout << "Successful match: " << iter << endl;
             walk_stack(state_stack);
@@ -621,38 +766,50 @@ vector<string> update_state(vector<string> state_stack, string& iter){
                 word_match = true;
             }
         }else if (state == "null") {    //finding errors and putting out error messages for states that were pushed on the stack but not on the file
-            if (iter >= "a" && iter <= "e" && row == 0) {
-                cout << "program\tis expected\n";
-                break;
-            } else if(iter >= "a" && iter <= "e" && row == 5){
+            if(iter >= "a" && iter <= "e" && row == 5){
                 cout << ",\tis expected\n";
                 break;
-            }else if(row == 14 && iter >= "a" && iter <= "e"){
-                cout << "Invalid Expression!\n";
+            }else if(row == 14 && iter >= "a" && iter <= "e" && state >= "0" && state <= "9"){
+                cout << "Invalid variable\n";
                 break;
-            }else if(row == 14 ){
+            }else if(row == 14){
                 cout << ";\tis expected\n";
                 break;
             }else if (iter == "begin") {
                 cout << iter << "\tis expected\n";
                 break;
-            } else if (iter == "end") {
-                cout << iter << "\tis expected\n";
-                break;
             } else if (iter == "integer" && (row == 5)) {
                 cout << ":\tis expected\n";
                 break;
-            } else if (row == 21) {
-                cout << "Show\tis expected\n";
+            } else if (row == 21 && iter == "=") {
+                cout << "Invalid Expression: Missing Variable\n";
                 break;
-            } else if(row == 6){
-                cout << "Integer\t is expected\n";
+            } else if(row == 21){
+                if(!check_spelling(iter)){
+                    cout << "show\t is expected\n";
+
+                }
                 break;
-            } else if(row ==1){
+            }else if(row == 3 && iter == "integer"){
+                cout << ":\t is expected\n";
+                break;
+            } else if(row==6){
+                if(!check_spelling(iter)){
+                    cout << "integer\t is expected\n";
+
+                }
+                break;
+            }else if(row ==1){
                 cout << "Unknown Identifier\n";
                 break;
+            }else if(row == 7){
+                cout << "Invalid Expression:\tMissing Variable\n";
+                break;
+            }else if(row == 11){
+                cout << "invalid Expression:\tMissing Expression\n";
+                break;
             }
-
+            break;
         }else if(state =="var" && iter != "var"){   //these errors are for states that weren't pushed on the stack and made errors
             cout << state << "\tis expected\n";
             state = "null";
@@ -685,7 +842,10 @@ vector<string> update_state(vector<string> state_stack, string& iter){
             cout << state << "\tis expected\n";
             state = "null";
             break;
-        }else break;
+        }else {
+            state = "null";
+            break;
+        }
 
 
 
@@ -693,4 +853,5 @@ vector<string> update_state(vector<string> state_stack, string& iter){
 
     return state_stack;
 }
+
 
