@@ -50,7 +50,7 @@ int main() {
 
 			do {
 				if (vector_given_tokens[y] == "integer")		// Shorten "integer" into "int".
-					ifile3 << "int" << ' ';						        // Other typical var types (double, float, etc.) are fine as is.
+					ifile3 << "int" << ' ';
 				else
 					ifile3 << vector_given_tokens[y] << ' ';
 
@@ -86,11 +86,11 @@ int main() {
 
 
 		// Rule for ';'
-		else if (vector_given_tokens[y] == ";" || vector_given_tokens[y] == "; ") {		// Question: Why do I need to check for "; "?
+		else if (vector_given_tokens[y] == ";" || vector_given_tokens[y] == "; ") {	// Question: Why do I need to check for "; "?
 			ifile3 << ";\n";
 
-			if (tabFlag == true && vector_given_tokens[y + 1] != "end")   // tabFlag is true only after .cpp file has entered "int main() function.
-				ifile3 << "\t"; 										                        // Second condition used so the last "}" is NOT tabbed.
+			if (tabFlag == true && vector_given_tokens[y + 1] != "end")   	// tabFlag is true only after .cpp file has entered "int main() function.
+				ifile3 << "\t";						// Second condition used so the last "}" is NOT tabbed.
 		}
 
 
