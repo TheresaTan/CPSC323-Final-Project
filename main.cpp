@@ -1,6 +1,7 @@
 
+
 //
-// Created by Theresa Tanubrata on 11/26/18.
+// Main CPP file with Part II functions
 //
 
 #include <iostream>
@@ -14,7 +15,6 @@
 #include <stdlib.h>
 #include "VectorString.h"
 
-#define PAUSE cout << "\n\n"; system("pause");
 using namespace std;
 
 //first and follow table
@@ -52,9 +52,6 @@ vector<string> state_stack;
 string state;
 int row, column;
 
-//Used to debug
-void walk_stack(vector<string>&);
-
 
 //Assigns the rows and does state = [row][column]
 //finds match for current state
@@ -69,11 +66,7 @@ void check_var(string);
 //assigns the columns
 void check_word(string);
 
-bool check_file_for_errors(vector<string>&);
 
-bool check_spelling(string&);
-
-void create_cpp_file(vector<string>&);
 
 int main(){
 
@@ -94,51 +87,8 @@ int main(){
 
     program_vector(vector_given_tokens);
 
-    //	PARENTHESES CHECK
-
- /*   int p_open = 0;
-    int p_close = 0;
-
-    for (auto it = vector_given_tokens.begin(); it != vector_given_tokens.end(); it++) {
-        string temp = *it;
-
-        if (temp.size() == 1) {
-            if (temp[0] == '(') p_open++;
-            else if (temp[0] == ')') p_close++;
-        }
-    }
-
-    if (p_open != p_close) {
-        if (p_open > p_close) {
-            cout << "EXPECTED (\n";
-        }
-
-        else cout << "EXPECTED )\n";
-
-        PAUSE
-        return 0;
-    }
-
-    //	PROGRAM IS NOT FRONT ELEMENT
-
-    if (vector_given_tokens.front() != "program") {
-        cout << "program expected\n";
-
-        PAUSE
-        return 0;
-    }
-
-    //	END IS NOT BACK ELEMENT
-
-    if (vector_given_tokens.back() != "end") {
-        cout << "end expected\n";
-
-        PAUSE
-        return 0;
-    }
-*/
-
-    walk_stack(vector_given_tokens);
+    //<DEBUGGING STACK>
+    //walk_stack(vector_given_tokens);
 
     cout << "Starting Part II.\n";
 
@@ -147,8 +97,6 @@ int main(){
     //pushing first element onto the stack
     state_stack.push_back("P");
 
-
-    cout << "Check for errors\n";
     //if true then there are automatic errors in the file
     bool errors = check_file_for_errors(vector_given_tokens);
     if(errors){
@@ -156,14 +104,12 @@ int main(){
         return 0;
     }
 
-    cout << "<START DEBUGGING FILE>\n";
+    cout << "<READING PROGRAM>\n";
     for(int i=0; i<vector_given_tokens.size(); i++){
         //pop top element in state_stack
         state = state_stack.back();
         state_stack.pop_back();
-        cout <<"Pop: " << state << endl;
         iter = vector_given_tokens[i];
-        cout << "Read: " << iter << endl;
 
 
         check_word(iter);
@@ -187,161 +133,10 @@ int main(){
 
 
 
-//PART II AND PART III FUNCTIONS
-
-
-void walk_stack(vector<string>& state_stack){
-    vector<string> temp = state_stack;
-    cout << "Current Stack: ";
-    for(auto it = temp.begin(); it < temp.end(); it++){
-        cout << *it << " \t";
-    }
-    cout << endl;
-}
+//PART II FUNCTIONS
 
 
 
-
-
-
-bool check_file_for_errors(vector<string>& vector_given_tokens){
-    //counters for the parentheses
-    int p_open = 0, p_close = 0;
-    //temporary vector string to keep track of declared variables
-    vector<string> temp;
-
-    //checks if program is in the file
-    if(vector_given_tokens[0] != "program"){
-        cout << endl;
-        cout << "program \tis expected\n";
-        return true;
-    }
-
-    //checks if end is in the file
-    if(vector_given_tokens[vector_given_tokens.size()-1] != "end"){
-        cout << endl;
-        cout << "end \tis expected\n";
-        return true;
-    }
-
-    //loops through the file to find any undefined variables, or illegal expressions
-    for(int i = 0; i < vector_given_tokens.size(); i++){
-        if(vector_given_tokens[i] == "("){
-
-            //counts left parentheses
-            p_open++;
-        }else if(vector_given_tokens[i] == ")"){
-
-            //counts right parentheses
-            p_close++;
-        }
-
-        if(vector_given_tokens[i] == "var"){
-
-            //looks for variables and pushes them on a temporary vector
-            //int j = i+1;
-            //increments to the beginning of the declaration list
-            i++;
-            bool dec_list_done = false;
-
-            //keeps looping through the declaration list until it reaches the end (: or integer)
-            while(!dec_list_done){
-
-                //if reading : or integer then the declaration list of variables is done
-                //put : and integer and ; in case one of them is missing from the file
-                if(vector_given_tokens[i] == ":" || vector_given_tokens[i] == "integer" || vector_given_tokens[i] == ";"){
-                    dec_list_done = true;
-                }
-
-                //pushes back only the variables and no punctuation marks
-                if(vector_given_tokens[i] != "," && vector_given_tokens[i] != ":") {
-                    temp.push_back(vector_given_tokens[i]);
-                }
-                i++;
-            }
-            cout << "Temp stack\n";
-            walk_stack(temp);
-        }
-
-
-        //looping thorugh part that uses the declared variables: assigning values, showing values, and changing values
-        //Mainly looks for any illegal expressions or undefined variables being used
-        if(vector_given_tokens[i] == "begin" && !temp.empty()){
-            int k = i+1;
-            //current variable being looked at
-            string var_name;
-            //string used to check if the expression is legal
-            string check_expression;
-
-
-            while(vector_given_tokens[k] != "end"){
-                var_name = vector_given_tokens[k];
-                auto it = var_name.begin();
-                if( (*it >='a' && *it <= 'e')|| (*it >= '0' && *it <= '9') ){
-                    //specifically checks the variables
-                    if(*it >='a' && *it <= 'e'){
-                        bool defined = false;
-                        for(int l = 0; l < temp.size(); l++){
-                            if(temp[l] == var_name){
-                                defined = true;
-                            }
-                        }
-                        if(!defined){
-                            cout << endl;
-                            cout << var_name << "\tUndefined Expression!\n";
-                            return true;
-                        }
-                    }
-                    //checks whether expression is valid
-                    check_expression = vector_given_tokens[k+1];
-                    auto it2 = check_expression.begin();
-                    if( (*it2 >= 'a' && *it2 <= 'e') || *it2 == '(' || (*it2 >= '0' && *it2 <= '9')){
-                        cout << endl;
-                        cout << "Illegal Expression\n";
-                        return true;
-                    }
-
-
-                }
-                k++;
-
-            }
-        }
-
-
-    }
-
-    //checking if the left parentheses or right parentheses is more than the other
-    if(p_open < p_close){
-        cout << endl;
-        cout << "(\t Left Parentheses is missing.\n";
-        return true;
-    }else if(p_open > p_close){
-        cout << endl;
-        cout << ")\t Right Parentheses is missing.\n";
-        return true;
-    }
-
-    //returns false if there are no automatic errors in the file
-    return false;
-}
-
-//Only checks the spelling of the words integer and show
-bool check_spelling(string& word){
-    //checks to see if any of the letters in the referenced word contains any of the letters from the words "integer" or "show"
-    for(auto it = word.begin(); it != word.end(); ++it){
-        if(*it == 'i' || *it == 'n' || *it == 't' || *it == 'e' || *it == 'g' || *it == 'r'){
-            cout << endl;
-            cout << "Integer is misspelled!\n";
-            return true;
-        }else if(*it == 's' || *it == 'h' || *it == 'o' || *it == 'w'){
-            cout << endl;
-            cout << "Show is misspelled!\n";
-            return true;
-        }
-    }
-    return false;
-}
 
 void check_var(string iter){
     auto it = iter.begin();
@@ -368,8 +163,6 @@ void check_var(string iter){
 
         }
 
-        cout <<"Pop: " << state << endl;
-        cout <<"Looking for: " << *it << endl;
         //making char a string
         letter = *it;
         state_stack = update_state(state_stack, letter);
@@ -445,160 +238,75 @@ vector<string> update_state(vector<string> state_stack, string& iter){
         //assigning the row and reading the table with row and column
         if (state == "A") {
             row = 10;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "B") {
             row = 4;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "C") {
-
             row = 6;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "D") {
-
             row = 3;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "E") {
-
             row = 11;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "F") {
-
             row = 15;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "G") {
-
             row = 7;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "H") {
-
             row = 18;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "I") {
             row = 1;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "J") {
-
             row = 19;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "K") {
-
             row = 2;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "L") {
-
             row = 20;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "M") {
-
             row = 5;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "N") {
-
             row = 16;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "O") {
-
             row = 17;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "P") {
             row = 0;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "Q") {
-
             row = 12;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "R") {
-
             row = 14;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "S") {
-
             row = 8;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "T") {
-
             row = 13;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "U") {
-
             row = 21;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         } else if (state == "W") {
-
             row = 9;
-            cout << "[" << state << "][";
-            cout << iter << "] = ";
             state = table[row][column];
-            cout << state << endl;
         }
 
 
         if (state == iter) {
             cout << "Successful match: " << iter << endl;
-            walk_stack(state_stack);
             word_match = true;
         } else if (state == "program I; var D begin G end") {   //pushing back elements from the table into the state_stack
 
@@ -610,190 +318,143 @@ vector<string> update_state(vector<string> state_stack, string& iter){
             state_stack.push_back(";");
             state_stack.push_back("I");
             state_stack.push_back("program");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
         } else if (state == "LK") {
             state_stack.push_back("K");
             state_stack.push_back("L");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
         } else if (state == "JK") {
             state_stack.push_back("K");
             state_stack.push_back("J");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
         } else if (state == "B:C;") {
             state_stack.push_back(";");
             state_stack.push_back("C");
             state_stack.push_back(":");
             state_stack.push_back("B");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "IM") {
             state_stack.push_back("M");
             state_stack.push_back("I");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
         } else if (state == ",IM") {
             state_stack.push_back("M");
             state_stack.push_back("I");
             state_stack.push_back(",");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
         } else if (state == "SU") {
             state_stack.push_back("U");
             state_stack.push_back("S");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
         } else if (state == "W") {
             state_stack.push_back("W");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
         } else if (state == "A") {
             state_stack.push_back("A");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
         } else if (state == "show(I);") {
             state_stack.push_back(";");
             state_stack.push_back(")");
             state_stack.push_back("I");
             state_stack.push_back("(");
             state_stack.push_back("show");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
         } else if (state == "I=E;") {
             state_stack.push_back(";");
             state_stack.push_back("E");
             state_stack.push_back("=");
             state_stack.push_back("I");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "TQ") {
             state_stack.push_back("Q");
             state_stack.push_back("T");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "+TQ") {
             state_stack.push_back("Q");
             state_stack.push_back("T");
             state_stack.push_back("+");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "-TQ") {
             state_stack.push_back("Q");
             state_stack.push_back("T");
             state_stack.push_back("-");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "FR") {
             state_stack.push_back("R");
             state_stack.push_back("F");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "*FR") {
             state_stack.push_back("R");
             state_stack.push_back("F");
             state_stack.push_back("*");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "/FR") {
             state_stack.push_back("R");
             state_stack.push_back("F");
             state_stack.push_back("/");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "I") {
             state_stack.push_back("I");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "N") {
             state_stack.push_back("N");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "(E)") {
             state_stack.push_back(")");
             state_stack.push_back("E");
             state_stack.push_back("(");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "JO") {
             state_stack.push_back("O");
             state_stack.push_back("J");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "HJO") {
             state_stack.push_back("O");
             state_stack.push_back("J");
             state_stack.push_back("H");
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "lambda") {
-            walk_stack(state_stack);
             state = state_stack.back();
             state_stack.pop_back();
-            cout << "Pop: " << state << endl;
 
         } else if (state == "a-e") {
             if (iter >= "a" && iter <= "e") {
                 cout << "Successful Match: " << iter << endl;
-                walk_stack(state_stack);
                 state = state_stack.back();
                 state_stack.pop_back();
 
@@ -802,7 +463,6 @@ vector<string> update_state(vector<string> state_stack, string& iter){
         } else if (state == "0-9") {
             if (iter >= "0" && iter <= "9") {
                 cout << "Successful Match: " << iter << endl;
-                walk_stack(state_stack);
                 state = state_stack.back();
                 state_stack.pop_back();
                 word_match = true;
@@ -896,91 +556,4 @@ vector<string> update_state(vector<string> state_stack, string& iter){
     return state_stack;
 }
 
-void create_cpp_file(vector<string>& vector_given_tokens){
-    // Create .cpp file for output
-    fstream ifile3;
-    ifile3.open("filep3.cpp", ios::out);
 
-    // bool flag for tabs within "int main()"
-    bool tabFlag = false;
-
-    cout << "\nCreating new filep3.cpp\n\n";
-
-    // Begin iterating through vector
-    for (int y = 0; y < vector_given_tokens.size(); y++) {
-
-        // Rule for keyword "program"
-        if (vector_given_tokens[y] == "program") {
-            ifile3 << "#include <iostream>" << "\n"
-                   << "using namespace std;" << "\n";
-
-            while (vector_given_tokens[y] != ";")	// Increment vector position while ';' is not found
-                y++;
-        }
-
-
-            // Rule for keyword "var"
-        else if (vector_given_tokens[y] == "var") {
-            y += 1;	// Skip "var" token
-
-            do {
-                if (vector_given_tokens[y] == "integer")		// Shorten "integer" into "int".
-                    ifile3 << "int" << ' ';
-                else
-                    ifile3 << vector_given_tokens[y] << ' ';
-
-                y += 1;	// Increment vector position
-
-            } while (vector_given_tokens[y] != ";");	// Exit loop once a ';' is found
-
-            ifile3 << ";\n";	// Finish "var" rule by including this string
-
-        }
-
-
-            // Rule for keyword "begin"
-        else if (vector_given_tokens[y] == "begin") {
-            ifile3 << "int main()" << "\n"		// Ouput main function to .cpp
-                   << '{' << "\n\t";
-            tabFlag = true;		                // Begin tabbing each line
-        }
-
-
-            // Rule for "show"
-        else if (vector_given_tokens[y] == "show") {
-            ifile3 << "cout << ";
-
-            y += 2;		// Skip ahead two vector positions to bypass "show" and "("
-
-            ifile3 << vector_given_tokens[y];
-
-            y += 1;		// Skip ahead one vector position to bypass ")"
-
-            ifile3 << ' ';
-        }
-
-
-            // Rule for ';'
-        else if (vector_given_tokens[y] == ";" || vector_given_tokens[y] == "; ") {	// Question: Why do I need to check for "; "?
-            ifile3 << ";\n";
-
-            if (tabFlag == true && vector_given_tokens[y + 1] != "end")   	// tabFlag is true only after .cpp file has entered "int main() function.
-                ifile3 << "\t";						// Second condition used so the last "}" is NOT tabbed.
-        }
-
-
-            // Rule for "end"
-        else if (vector_given_tokens[y] == "end") {
-            tabFlag = false;		// Reset tabFlag to false
-            ifile3 << "}\n";		// Finish .cpp file
-        }
-
-
-        else
-            ifile3 << vector_given_tokens[y] << ' ';
-    }
-
-    cout << "File filep3.cpp has been created.\n";
-
-    ifile3.close();
-}
