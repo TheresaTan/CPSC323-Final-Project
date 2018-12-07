@@ -1,3 +1,8 @@
+#include <iostream>
+#include <fstream>		//file reading
+#include <string>
+#include <vector>
+
 #include "VectorString.h"		// Header file
 
 using namespace std;
