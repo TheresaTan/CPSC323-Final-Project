@@ -5,6 +5,7 @@
 #include <fstream>		//file reading
 #include <string>
 #include <vector>
+#include <sstream>
 
 #define PAUSE cout << "\n\n"; system("pause");
 
@@ -18,7 +19,6 @@ void proper_spacing(string&); // add proper spacing to the line
 
 void program_vector(vector<string>&); // populate a vector with the tokens found in a program file
 
-
 int main() {
 
 	if (remove("finalp2.txt") == 0) {
@@ -31,54 +31,64 @@ int main() {
 
 	readfile(file_contents);
 
-	//ideas:
-	//	use parsing tokens to break up non white space substrings and then space them out ex token_n + ' ' + token_n+1
-
 	vector<string> vector_given_tokens;
 
 	// CREATING TOKENS AND PLACING THEM IN A VECTOR
 
 	program_vector(vector_given_tokens);
 
-	/*fstream ifile2;
-	ifile2.open("finalp2.txt");
+	//	PARENTHESES CHECK
 
-	if (!ifile2.is_open()) {
-		cout << "finalp2.txt not found...\n";
+	int p_open = 0;
+	int p_close = 0;
+
+	for (auto it = vector_given_tokens.begin(); it != vector_given_tokens.end(); it++) {
+		string temp = *it;
+
+		if (temp.size() == 1) {
+			if (temp[0] == '(') p_open++;
+			else if (temp[0] == ')') p_close++;
+		}
+	}
+
+	if (p_open != p_close) {
+		if (p_open > p_close) {
+			cout << "EXPECTED (\n";
+		}
+
+		else cout << "EXPECTED )\n";
+		
 		PAUSE
 		return 0;
 	}
 
-	cout << "\nfinalp2.txt FOUND!\n";
-	string str_line;
-	string word;
+	//	PROGRAM IS NOT FRONT ELEMENT
 
-	while (!ifile2.eof()) {
-		getline(ifile2, str_line);
-		for (int x = 0; x < str_line.length(); x++) {
-			if (str_line[x] == ' ' || x + 1 == str_line.length()) {
+	if (vector_given_tokens.front() != "program") {
+		cout << "program expected\n";
 
-				if (x + 1 == str_line.length()) {
-					word += str_line[x];
-				}
-
-				word += '\0';
-				vector_words.push_back(word);
-				word.clear();
-
-				continue;
-			}
-
-			word += str_line[x];
-		}
+		PAUSE
+		return 0;
 	}
-	*/
+
+	//	END IS NOT BACK ELEMENT
+
+	if (vector_given_tokens.back() != "end") {
+		cout << "end expected\n";
+
+		PAUSE
+		return 0;
+	}
 
 	//	VECTOR POPULATION CHECK		PASSED
-	cout << "\n\tTOKEN VECTOR POPULATION CHECK\n\n";
-	for (int x = 0; x < vector_given_tokens.size(); x++) {	//	VECTOR POPULATION CHECK
-		cout << x << ":\t" << vector_given_tokens[x] << "\n";
-	}
+	//cout << "\n\tTOKEN VECTOR POPULATION CHECK\n\n";
+	//for (int x = 0; x < vector_given_tokens.size(); x++) {
+	//	string temp = vector_given_tokens[x];
+	//	//for (auto it = temp.begin(); it != temp.end(); it++) {
+	//	//	if (isspace(*it)) { *it = '.'; }
+	//	//}
+	//	cout << x << ":\t" << vector_given_tokens[x] << "\t" << temp.size() << "\n";
+	//} // DEBUG
 
 	PAUSE
 	return 0;
@@ -95,8 +105,7 @@ void readfile(string &file_contents) { // a function to read a file into a strin
 		PAUSE
 			exit;
 	}
-	else
-		cout << "finalp1.txt FOUND!\n\n";
+	//else cout << "finalp1.txt FOUND!\n\n";
 
 	string str_line;
 
@@ -111,17 +120,23 @@ void readfile(string &file_contents) { // a function to read a file into a strin
 
 		proper_spacing(str_line);					// ADD PROPER SPACING
 
-		file_contents += str_line;
-
 		if (str_line.length() > 0 &&									// if length is greater than 0
 			str_line.find_first_not_of(' ') != std::string::npos &&		// if the line doesnt consist of space
-			str_line.find_first_not_of('\t') != std::string::npos)		// if the line doesnt consist of tabs
+			str_line.find_first_not_of('\t') != std::string::npos) {	// if the line doesnt consist of tabs
 
-			file_contents += "\n";
+			while (str_line.back() == ' ') {
+				str_line.pop_back();
+			}
+
+			if (!str_line.find("end")) {
+				file_contents += str_line;
+			} else file_contents += str_line + "\n";
+
+		}
 	}
 
 
-	cout << "\tSTRING CONTENTS FOR FILE AFTER\n\t\t-WHITE SPACE REMOVAL\n\t\t-SINGLE LINE COMMENT REMOVAL\n\t\t-MULTILINE COMMENT REMOVAL\n\n" << file_contents; // string::file_contents population test
+	//cout << "\tSTRING CONTENTS FOR FILE AFTER\n\t\t-WHITE SPACE REMOVAL\n\t\t-SINGLE LINE COMMENT REMOVAL\n\t\t-MULTILINE COMMENT REMOVAL\n\n" << file_contents; // string::file_contents population test
 	ifile.close();
 
 	ofstream ofile;
@@ -195,7 +210,7 @@ void remove_single_comments(string &str_line) {
 		//the following occurs while the length of the string is not equal to the 0th position that the "//" string was found
 		//it will remove the comment
 		while (str_line.length() != found_at) {
-			str_line.pop_back();
+			str_line.pop_back(); // pop until there are no more white spaces
 		}
 	}
 }
@@ -212,8 +227,8 @@ void remove_multiple_comments(fstream &ifile, string &str_line) {
 	start_found_at = str_line.find("/*"); // by default, the std::string.find(<string>) will return std::string::npos (the maximum amount of characters in a string)
 	if (start_found_at != std::string::npos) {
 
-		cout << "Start Multi Comment Found\n"; // DEBUG
-		cout << str_line << endl; // DEBUG
+		//cout << "Start Multi Comment Found\n"; // DEBUG
+		//cout << str_line << endl; // DEBUG
 
 		multi = 1; // start multiple line comment symbol found
 
@@ -229,11 +244,11 @@ void remove_multiple_comments(fstream &ifile, string &str_line) {
 			while (multi) { // while multiple line comment end symbol not resolved
 
 				getline(ifile, str_line); // grab the next line
-				cout << str_line << endl; // DEBUG
+				//cout << str_line << endl; // DEBUG
 				end_found_at = str_line.find("*/");
 
 				if (end_found_at != std::string::npos) {
-					cout << "End Multi Comment Found\n"; // DEBUG
+					//cout << "End Multi Comment Found\n"; // DEBUG
 					str_line.erase(str_line.begin(), str_line.begin() + end_found_at + 2);
 					multi = 0;
 				}
@@ -246,19 +261,37 @@ void proper_spacing(string &str_line) {
 	//		ADD PROPER SPACING
 
 	for (int element = 0; element < str_line.length(); element++) { // walk the string
-		// if there is a punctuation and it is not the first element of the string
-			// add a space before it if there doesnt already exist a space character
-		if (element != 0 && ispunct(str_line[element]) && str_line[element - 1] != ' ') {
-			str_line.insert(str_line.begin() + element, ' ');
-			element += 1; // increment by 1 because the string increases by one and following chars from this position have their address incremented by one
+
+		// symbol exception ex +2
+		// break if the next character is a number
+		if (element != 0 &&
+			(str_line[element] == '+' ||
+			str_line[element] == '-') &&
+			isdigit(str_line[element + 1])) {
+		
+			break;
 		}
 
 		// if there is a punctuation before another token without spaces in between (example: ",TOKEN")
 			// add a space where the token begins; between the punctuation and the next token (", TOKEN")
-		if (element != 0 && isalnum(str_line[element]) && ispunct(str_line[element - 1])) {
+		if (element != 0 &&						// not the beginning
+			isalnum(str_line[element]) &&		// current is number or letter
+			ispunct(str_line[element - 1])) {	// previous is a punctuation
+
 			str_line.insert(str_line.begin() + element, ' ');
-			element += 1; // increment by 1 because the string increases by one and following chars from this position have their address incremented by one
+			//element += 1; // increment by 1 because the string increases by one and following chars from this position have their address incremented by one
 		}
+
+		// if there is a punctuation and it is not the first element of the string
+			// add a space before it if there doesnt already exist a space character
+		if (element != 0 &&						// not the beginning
+			ispunct(str_line[element]) &&		// current is puncuation
+			str_line[element - 1] != ' ') {		// previous is not a space
+
+			str_line.insert(str_line.begin() + element, ' ');
+			//element += 1; // increment by 1 because the string increases by one and following chars from this position have their address incremented by one
+		}
+
 	}
 }
 
@@ -275,7 +308,7 @@ void program_vector(vector<string>& vector_given_tokens) {
 			exit;
 	}
 
-	cout << "\nfinalp2.txt FOUND!\n";
+	//cout << "\nfinalp2.txt FOUND!\n";
 	string str_line;
 	string word;
 
@@ -288,7 +321,10 @@ void program_vector(vector<string>& vector_given_tokens) {
 					word += str_line[x];
 				}
 
-				word += '\0';
+				while (word.back() == ' ') {
+					word.pop_back();
+				}
+
 				vector_given_tokens.push_back(word);
 				word.clear();
 
