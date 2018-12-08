@@ -4,6 +4,11 @@
 // Main CPP file with Part II functions
 //
 
+
+//
+// Created by Theresa Tanubrata on 11/26/18.
+//
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -23,7 +28,7 @@ string table[22][19] = {
         //state  program                        integer   show(     ; var     begin    end     a-e     0-9       +        -        (        *         /        ,         :          );       =          ;    invalid
         /*P=0*/ {"program I; var D begin G end", "null", "null"   , "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
         /*I=1*/ {"null"                        , "null", "null"   , "null"  , "null", "null", "LK"  , "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
-        /*K=2*/ {"null"                        , "null", "null"   , "null  ", "null", "null", "LK"  , "JK"  , "null" , "null" , "null", "lambda", "lambda", "lambda", "lambda", "lambda", "lambda","lambda", "null"},
+        /*K=2*/ {"null"                        , "null", "null"   , "null  ", "null", "null", "LK"  , "JK"  ,"lambda","lambda", "null", "lambda", "lambda", "lambda", "lambda", "lambda", "lambda","lambda", "null"},
         /*D=3*/ {"null"                        , "null", "null"   , "null"  , "null", "null", "B:C;", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
         /*B=4*/ {"null"                        , "null", "null"   , "null"  , "null", "null", "IM"  , "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
         /*M=5*/ {"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , ",IM"   , "lambda", "null"  , "null"  , "null" , "null"},
@@ -33,12 +38,12 @@ string table[22][19] = {
         /*W=9*/ {"null"                        , "null","show(I);", "null"  , "null", "null", "null", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
         /*A=10*/{"null"                        , "null", "null"   , "null"  , "null", "null", "I=E;", "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
         /*E=11*/{"null"                        , "null", "null"   , "null"  , "null", "null", "TQ"  , "TQ"  , "TQ"   , "TQ"   , "TQ"  , "null"  , "null"  , "null"  , "null"  ,  "null" , "null"  , "null" , "null"},
-        /*Q=12*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null", "+TQ"  , "-TQ"  , "null", "null"  , "null"  , "null"  , "null"  ,"lambda", "null"  ,"lambda", "null"},
-        /*T=13*/{"null"                        , "null", "null"   , "null"  , "null", "null", "FR"  , "FR"  , "FR"   , "FR"   , "FR"  , "null"  , "null"  , "null"  , "null"  ,"lambda", "null"  , "null" , "null"},
-        /*R=14*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null","lambda","lambda", "null", "*FR"   , "/FR"   , "null"  , "null"  ,"lambda", "null"  ,"lambda", "null"},
-        /*F=15*/{"null"                        , "null", "null"   , "null"  , "null", "null", "I"   , "N"   , "N"    , "N"    , "(E)" , "null"  , "null"  , "null"  , "null"  ,"lambda", "null"  , "null" , "null"},
+        /*Q=12*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null", "+TQ"  , "-TQ"  , "null", "null"  , "null"  , "null"  , "null"  , "lambda", "null"  ,"lambda", "null"},
+        /*T=13*/{"null"                        , "null", "null"   , "null"  , "null", "null", "FR"  , "FR"  , "FR"   , "FR"   , "FR"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
+        /*R=14*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "null","lambda","lambda", "null", "*FR"   , "/FR"   , "null"  , "null"  , "lambda", "null"  ,"lambda", "null"},
+        /*F=15*/{"null"                        , "null", "null"   , "null"  , "null", "null", "I"   , "N"   , "N"    , "N"    , "(E)" , "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
         /*N=16*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "JO"  , "HJO"  , "HJO"  , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
-        /*O=17*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "JO"  ,"lambda","lambda", "null","lambda" ,"lambda" , "null"  , "null"  , "null"  , "null"  ,"lambda", "null"},
+        /*O=17*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "JO"  ,"lambda","lambda", "null","lambda" ,"lambda" , "null"  , "null"  ,"lambda" , "null"  ,"lambda", "null"},
         /*H=18*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null","lambda", "+"   , "-"    , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
         /*J=19*/{"null"                        , "null", "null"   , "null"  , "null", "null", "null", "0-9" , "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
         /*L=20*/{"null"                        , "null", "null"   , "null"  , "null", "null", "a-e" , "null", "null" , "null" , "null", "null"  , "null"  , "null"  , "null"  , "null"  , "null"  , "null" , "null"},
@@ -70,6 +75,7 @@ void check_word(string);
 
 int main(){
 
+    //PART I
     if (remove("finalp2.txt") == 0) {
         cout << "\n\n\tPrevious finalp2.txt file found and deleted\n\n";
         //PAUSE
@@ -90,14 +96,16 @@ int main(){
     //<DEBUGGING STACK>
     //walk_stack(vector_given_tokens);
 
+
+
     cout << "Starting Part II.\n";
 
-    //the word read in the file
+    //this string will be used for the words read in the file
     string iter;
     //pushing first element onto the stack
     state_stack.push_back("P");
 
-    //if true then there are automatic errors in the file
+    //if true then there are automatic errors in the file e.g. program or end missing, etc.
     bool errors = check_file_for_errors(vector_given_tokens);
     if(errors){
         cout << "Rejected.\n";
@@ -304,8 +312,7 @@ vector<string> update_state(vector<string> state_stack, string& iter){
             state = table[row][column];
         }
 
-
-        if (state == iter) {
+        if (state == iter) {//SUCCESSFUL MATCH
             cout << "Successful match: " << iter << endl;
             word_match = true;
         } else if (state == "program I; var D begin G end") {   //pushing back elements from the table into the state_stack
@@ -469,19 +476,19 @@ vector<string> update_state(vector<string> state_stack, string& iter){
             }
         }else if (state == "null") {    //finding errors and putting out error messages for states that were pushed on the stack but not on the file
             if(iter >= "a" && iter <= "e" && row == 5){
-                cout << ",\tis expected\n";
+                cout << ",\tis missing\n";
                 break;
             }else if(row == 14 && iter >= "a" && iter <= "e" && state >= "0" && state <= "9"){
                 cout << "Invalid variable\n";
                 break;
             }else if(row == 14){
-                cout << ";\tis expected\n";
+                cout << ";\tis missing\n";
                 break;
             }else if (iter == "begin") {
                 cout << iter << "\tis expected\n";
                 break;
             } else if (iter == "integer" && (row == 5)) {
-                cout << ":\tis expected\n";
+                cout << ":\tis missing\n";
                 break;
             } else if (row == 21 && iter == "=") {
                 cout << "Invalid Expression: Missing Variable\n";
@@ -491,9 +498,6 @@ vector<string> update_state(vector<string> state_stack, string& iter){
                     cout << "show\t is expected\n";
 
                 }
-                break;
-            }else if(row == 3 && iter == "integer"){
-                cout << ":\t is expected\n";
                 break;
             } else if(row==6){
                 if(!check_spelling(iter)){
@@ -520,28 +524,20 @@ vector<string> update_state(vector<string> state_stack, string& iter){
             cout << state << "\tis expected\n";
             state = "null";
             break;
-        }else if(state =="(" && iter != "("){
-            cout << state << "\tis expected\n";
-            state = "null";
-            break;
-        }else if(state ==")" && iter != ")"){
-            cout << state << "\tis expected\n";
-            state = "null";
-            break;
         }else if(state =="," && iter != ","){
-            cout << state << "\tis expected\n";
+            cout << state << "\tis missing\n";
             state = "null";
             break;
         }else if(state ==":" && iter != ":"){
-            cout << state << "\tis expected\n";
+            cout << state << "\tis missing\n";
             state = "null";
             break;
         }else if(state =="=" && iter != "="){
-            cout << state << "\tis expected\n";
+            cout << state << "\tis missing\n";
             state = "null";
             break;
         }else if(state ==";" && iter != ";"){
-            cout << state << "\tis expected\n";
+            cout << state << "\tis missing\n";
             state = "null";
             break;
         }else {
@@ -555,5 +551,6 @@ vector<string> update_state(vector<string> state_stack, string& iter){
 
     return state_stack;
 }
+
 
 
