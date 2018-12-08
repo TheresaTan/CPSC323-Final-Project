@@ -4,11 +4,6 @@
 // Main CPP file with Part II functions
 //
 
-
-//
-// Created by Theresa Tanubrata on 11/26/18.
-//
-
 #include <iostream>
 #include <string>
 #include <vector>
