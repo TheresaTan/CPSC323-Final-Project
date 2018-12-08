@@ -2,10 +2,6 @@
 // Header file that contains functions for all three parts
 //
 
-//
-// Created by Theresa Tanubrata on 12/7/18.
-//
-
 #ifndef VECTOR_STRING_INCLUDE
 #define VECTOR_STRING_INCLUDE
 
@@ -405,7 +401,7 @@ bool check_file_for_errors(vector<string>& vector_given_tokens){
                     check_expression = vector_given_tokens[k+1];
                     auto it3 = check_expression.begin();
 
-                    if(*it3 == '+' || *it3 == '*'){
+                    if(*it3 == '+' || *it3 == '*' || *it3 == ')'){
                         cout << endl;
                         cout << "Illegal Expression\n";
                         return true;
@@ -450,16 +446,6 @@ bool check_spelling(string& word){
     }
     return false;
 }
-
-
-
-
-
-
-
-
-
-
 
 
 //PART III FUNCTION
@@ -555,6 +541,7 @@ void create_cpp_file(vector<string>& vector_given_tokens){
 }
 
 #endif
+
 
 
 
