@@ -2,6 +2,10 @@
 // Header file that contains functions for all three parts
 //
 
+//
+// Created by Theresa Tanubrata on 12/7/18.
+//
+
 #ifndef VECTOR_STRING_INCLUDE
 #define VECTOR_STRING_INCLUDE
 
@@ -384,9 +388,12 @@ bool check_file_for_errors(vector<string>& vector_given_tokens){
                             return true;
                         }
                     }
+
                     //checks whether expression is valid
+                    //this iterates to the next token
                     check_expression = vector_given_tokens[k+1];
                     auto it2 = check_expression.begin();
+                    //checks if the next token after a variable or a number is a variable, number or '('
                     if( (*it2 >= 'a' && *it2 <= 'e') || *it2 == '(' || (*it2 >= '0' && *it2 <= '9')){
                         cout << endl;
                         cout << "Illegal Expression\n";
@@ -394,6 +401,15 @@ bool check_file_for_errors(vector<string>& vector_given_tokens){
                     }
 
 
+                }else if(*it == '+' || *it == '*' || *it == '('){
+                    check_expression = vector_given_tokens[k+1];
+                    auto it3 = check_expression.begin();
+
+                    if(*it3 == '+' || *it3 == '*'){
+                        cout << endl;
+                        cout << "Illegal Expression\n";
+                        return true;
+                    }
                 }
                 k++;
 
@@ -539,4 +555,6 @@ void create_cpp_file(vector<string>& vector_given_tokens){
 }
 
 #endif
+
+
 
