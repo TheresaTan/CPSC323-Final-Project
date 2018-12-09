@@ -41,7 +41,7 @@ void create_cpp_file(vector<string>&); //Translate finalp2.txt file into c++ pro
 void readfile(string &file_contents) { // a function to read a file into a string
     fstream ifile;
 
-    ifile.open("/Users/Theresa/CLionProjects/untitled13/finalp1.txt");
+    ifile.open("finalp1.txt");
 
     if (!ifile.is_open()) {
         std::cout << "finalp1.txt NOT FOUND...\n\n";
